@@ -16,5 +16,5 @@ data class Customer(
     @Column(name = "username", nullable = false, unique = true)
     var username: String,
     @Column(name = "balance")
-    val balance: Int =0
+    var balance: Int =0
 )

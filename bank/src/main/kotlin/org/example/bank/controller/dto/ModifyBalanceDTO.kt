@@ -1,6 +1,6 @@
 package org.example.bank.controller.dto
 
-data class BalanceResponseDTO(
+data class ModifyBalanceDTO(
     val userName: String,
-    val balance: Int
+    val amount: Int
 )

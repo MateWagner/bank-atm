@@ -5,13 +5,13 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 <changeSet id="customer" author="wm" runOnChange="true">
     <createTable tableName="customer">
-        <column name="id" type="int">
+        <column name="id" type="serial">
             <constraints primaryKey="true" primaryKeyName="customer_id_pk" />
         </column>
         <column name="username" type="varchar(250)" >
             <constraints nullable="false" unique="true" uniqueConstraintName="costumer_username_pk" />
         </column>
-        <column name="password" type="varchar(250)" >
+        <column name="balance" type="int">
             <constraints nullable="false" />
         </column>
     </createTable>
