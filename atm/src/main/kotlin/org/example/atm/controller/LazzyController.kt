@@ -4,6 +4,7 @@ import org.example.atm.controller.dto.DepositDTO
 import org.example.atm.controller.dto.RefillDTO
 import org.example.atm.controller.dto.UserBalanceDTO
 import org.example.atm.controller.dto.WithdrawDTO
+import org.example.atm.service.AtmService
 import org.example.atm.service.CustomerService
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -18,7 +19,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/")
 class LazzyController(
-    val customerService: CustomerService
+    val customerService: CustomerService,
+    val atmService: AtmService
 ) {
 
     @GetMapping("user-balance")
@@ -28,8 +30,8 @@ class LazzyController(
     fun withdraw(
         @RequestBody withdrawDTO: WithdrawDTO,
         @AuthenticationPrincipal userDetails: UserDetails
-    ) =
-        customerService.withdraw(withdrawDTO, userDetails.username)
+    ): Int =
+        atmService.withdraw(withdrawDTO, userDetails.username)
     @PostMapping("/deposit")
     fun deposit(
         @RequestBody depositDTO: DepositDTO,

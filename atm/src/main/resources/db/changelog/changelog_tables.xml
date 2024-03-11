@@ -18,5 +18,34 @@
             <constraints nullable="false" />
         </column>
     </createTable>
+    <createTable tableName="bn_dispenser">
+        <column name="id" type="serial">
+            <constraints primaryKey="true" primaryKeyName="bn_dispenser_id_pk"/>
+        </column>
+    </createTable>
+    <createTable tableName="bn_tray">
+        <column name="id" type="serial">
+            <constraints primaryKey="true" primaryKeyName="bn_tray_id_pk"/>
+        </column>
+        <column name="is_receive" type="BOOLEAN" >
+            <constraints nullable="false" />
+        </column>
+        <column name="value" type="INTEGER">
+            <constraints nullable="false" />
+        </column>
+        <column name="size" type="INTEGER" >
+            <constraints nullable="false" />
+        </column>
+        <column name="amount" type="INTEGER" >
+            <constraints nullable="false" />
+        </column>
+        <column name="bn_dispenser_id" type="BIGINT" />
+    </createTable>
+    <addForeignKeyConstraint baseTableName="bn_tray"
+                             baseColumnNames="bn_dispenser_id"
+                             constraintName="fk_bn_dispenser_id"
+                             referencedTableName="bn_dispenser"
+                             referencedColumnNames="id"
+                             onDelete="CASCADE"/>
 </changeSet>
 </databaseChangeLog>
