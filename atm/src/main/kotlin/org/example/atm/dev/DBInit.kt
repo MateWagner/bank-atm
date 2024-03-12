@@ -56,8 +56,15 @@ class DBInit(
             )
             banknoteDispenser.banknoteTrays.add(banknoteTray)
         }
-        banknoteDispenserRepo.save(banknoteDispenser)
 
+        val receiverTray:BanknoteTray = BanknoteTray(
+            isReceive = true,
+            size = 20,
+            value = 0,
+            amount = 0
+        )
+        banknoteDispenser.banknoteTrays.add(receiverTray)
+        banknoteDispenserRepo.save(banknoteDispenser)
     }
 
 }

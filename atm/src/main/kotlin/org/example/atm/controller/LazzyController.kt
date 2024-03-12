@@ -1,9 +1,6 @@
 package org.example.atm.controller
 
-import org.example.atm.controller.dto.DepositDTO
-import org.example.atm.controller.dto.RefillDTO
-import org.example.atm.controller.dto.UserBalanceDTO
-import org.example.atm.controller.dto.WithdrawDTO
+import org.example.atm.controller.dto.*
 import org.example.atm.service.AtmService
 import org.example.atm.service.CustomerService
 import org.springframework.http.HttpStatus
@@ -24,23 +21,23 @@ class LazzyController(
 ) {
 
     @GetMapping("user-balance")
-    fun userBalance( @AuthenticationPrincipal userDetails: UserDetails):UserBalanceDTO =
+    fun userBalance( @AuthenticationPrincipal userDetails: UserDetails): Int =
         customerService.userBalance(userDetails.username)
     @PostMapping("/withdraw")
     fun withdraw(
         @RequestBody withdrawDTO: WithdrawDTO,
         @AuthenticationPrincipal userDetails: UserDetails
-    ): Int =
+    ): BanknoteMapDTO =
         atmService.withdraw(withdrawDTO, userDetails.username)
     @PostMapping("/deposit")
     fun deposit(
-        @RequestBody depositDTO: DepositDTO,
+        @RequestBody banknoteMapDTO: BanknoteMapDTO,
         @AuthenticationPrincipal userDetails: UserDetails
     ) =
-        customerService.deposit(depositDTO, userDetails.username)
+        atmService.deposit(banknoteMapDTO, userDetails.username)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun refill(@RequestBody refillDTO: RefillDTO) =
-        customerService.refill(refillDTO)
+        atmService.refill(refillDTO)
 }

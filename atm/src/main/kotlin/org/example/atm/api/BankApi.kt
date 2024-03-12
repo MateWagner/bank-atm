@@ -15,7 +15,7 @@ class BankApi(
     @Value("\${atm.id}")
     val atmId: String,
     private val wabClient: WebClient = WebClient.builder().baseUrl("http://localhost:8081")
-        .defaultHeaders { it.set("X-ATM", "value") }.build(),
+        .defaultHeaders { it.set("X-ATM", atmId) }.build(),
 ) {
     fun sendBalanceRequest(userName: String): Int { //TODO Balazzsal megbeszelni az error handlinget
         try {

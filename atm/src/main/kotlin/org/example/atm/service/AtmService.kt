@@ -1,12 +1,10 @@
 package org.example.atm.service
 
-import org.example.atm.api.BankApi
-import org.example.atm.controller.dto.DepositDTO
+import org.example.atm.controller.dto.BanknoteMapDTO
 import org.example.atm.controller.dto.RefillDTO
 import org.example.atm.controller.dto.WithdrawDTO
 import org.example.atm.data.CurrencyTypes
 import org.example.atm.entity.BanknoteTray
-import org.example.atm.repository.BanknoteDispenserRepo
 import org.example.atm.repository.BanknoteTrayRepo
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
@@ -24,18 +22,23 @@ class AtmService(
     fun refill(refillDTO: RefillDTO) {
         TODO()
     }
-    fun deposit(depositDTO: DepositDTO, userName: String) {
-        println(userName)
+    fun deposit(banknoteMapDTO: BanknoteMapDTO, userName: String):Int {
+        val allowedBanknotes: Set<Int> = CurrencyTypes.valueOf(atmCurrencyType).trays
+        if (!allowedBanknotes.containsAll(banknoteMapDTO.banknotes.keys))
+            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Not conform banknote found")
+        banknoteTrayRepo.getTotalAvailableAmount()
+
+        return 1
     }
 
-    fun withdraw(withdrawDTO: WithdrawDTO, userName: String): Int {
+    fun withdraw(withdrawDTO: WithdrawDTO, userName: String): BanknoteMapDTO {
         val amount:Int = withdrawDTO.amount
 
         val rule:Regex = CurrencyTypes.valueOf(atmCurrencyType).currencyBanknoteRule
         if (!rule.matches(amount.toString()))
             throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad amount")
 
-        val atmMaxAvailable: Int = getMaxAvailableAmount()
+        val atmMaxAvailable: Int = banknoteTrayRepo.getTotalAvailableAmount()
         if (atmMaxAvailable < amount)
             throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "ATM Don't have enough money")
 
@@ -43,19 +46,14 @@ class AtmService(
         if (customerMaxAvailable < amount)
             throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Customer balance is low")
 
-        revokeAmountFromTrays(amount)
+        val banknoteMap: Map<Int, Int> = revokeAmountFromTrays(amount)
         customerService.modifyUserBalance(-amount, userName)
 
-        return amount
+        return BanknoteMapDTO(banknoteMap)
     }
 
-    private fun getMaxAvailableAmount(): Int { // TODO convert to sql request
-        val banknoteTrays: MutableList<BanknoteTray> = banknoteTrayRepo.findAll()
-        val availableAmount: Int = banknoteTrays.filter { it.amount > 0 }.sumOf { it.value * it.amount }
-        return availableAmount
-    }
-
-    private fun revokeAmountFromTrays(amount: Int) {
+    private fun revokeAmountFromTrays(amount: Int):Map<Int,Int> {
+        val resultMap:MutableMap<Int,Int> = mutableMapOf()
         val banknoteTrays: MutableList<BanknoteTray> = banknoteTrayRepo.findAll()
         banknoteTrays.sortByDescending { it.value }
         var remaining = amount
@@ -66,14 +64,17 @@ class AtmService(
                 if (maxBanknoteCount > count) {
                     remaining -= count * banknoteTray.value
                     banknoteTray.amount -= count
+                    resultMap[banknoteTray.value] = count
                 } else {
                     remaining -= maxBanknoteCount * banknoteTray.value
                     banknoteTray.amount = 0
+                    resultMap[banknoteTray.value]= maxBanknoteCount
                 }
             }
             if (remaining == 0)
                 break
         }
         banknoteTrayRepo.saveAll(banknoteTrays)
+        return resultMap
     }
 }
