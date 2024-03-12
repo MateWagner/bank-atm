@@ -22,19 +22,51 @@ class AtmService(
     fun refill(refillDTO: RefillDTO) {
         TODO()
     }
-    fun deposit(banknoteMapDTO: BanknoteMapDTO, userName: String):Int {
+
+    fun deposit(banknoteMapDTO: BanknoteMapDTO, userName: String): Int {
         val allowedBanknotes: Set<Int> = CurrencyTypes.valueOf(atmCurrencyType).trays
         if (!allowedBanknotes.containsAll(banknoteMapDTO.banknotes.keys))
             throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Not conform banknote found")
-        banknoteTrayRepo.getTotalAvailableAmount()
+        val receiverTrays: List<BanknoteTray> = banknoteTrayRepo.getAllByIsReceiveIsTrue()
+        val maxAvailableSpace: Int = receiverTrays.sumOf { it.size - it.amount }
+        val numberOfBanknote: Int = banknoteMapDTO.banknotes.values.sum()
 
-        return 1
+        if (maxAvailableSpace < numberOfBanknote)
+            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Don't have enough storage")
+
+        storeBanknotes(banknoteMapDTO, receiverTrays)
+
+        val amount = banknoteMapDTO.banknotes.entries.sumOf { it.key*it.value }
+        customerService.modifyUserBalance(amount, userName)
+        return amount
+    }
+
+    private fun storeBanknotes(
+        banknoteMapDTO: BanknoteMapDTO,
+        receiverTrays: List<BanknoteTray>
+    ) {
+        val remainingNotes: MutableList<Int> = banknoteMapDTO
+            .banknotes
+            .flatMap { (kay, value) -> List(value) { kay } }
+            .toMutableList()
+
+        for (receiverTray in receiverTrays) {
+            if (receiverTray.amount == receiverTray.size)
+                continue
+            for (i in 0 until remainingNotes.size) {
+                receiverTray.value += remainingNotes.removeFirst()
+                receiverTray.amount++
+                if (receiverTray.amount == receiverTray.size)
+                    break
+            }
+        }
+        banknoteTrayRepo.saveAll(receiverTrays)
     }
 
     fun withdraw(withdrawDTO: WithdrawDTO, userName: String): BanknoteMapDTO {
-        val amount:Int = withdrawDTO.amount
+        val amount: Int = withdrawDTO.amount
 
-        val rule:Regex = CurrencyTypes.valueOf(atmCurrencyType).currencyBanknoteRule
+        val rule: Regex = CurrencyTypes.valueOf(atmCurrencyType).currencyBanknoteRule
         if (!rule.matches(amount.toString()))
             throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad amount")
 
@@ -52,8 +84,8 @@ class AtmService(
         return BanknoteMapDTO(banknoteMap)
     }
 
-    private fun revokeAmountFromTrays(amount: Int):Map<Int,Int> {
-        val resultMap:MutableMap<Int,Int> = mutableMapOf()
+    private fun revokeAmountFromTrays(amount: Int): Map<Int, Int> {
+        val resultMap: MutableMap<Int, Int> = mutableMapOf()
         val banknoteTrays: MutableList<BanknoteTray> = banknoteTrayRepo.findAll()
         banknoteTrays.sortByDescending { it.value }
         var remaining = amount
@@ -68,7 +100,7 @@ class AtmService(
                 } else {
                     remaining -= maxBanknoteCount * banknoteTray.value
                     banknoteTray.amount = 0
-                    resultMap[banknoteTray.value]= maxBanknoteCount
+                    resultMap[banknoteTray.value] = maxBanknoteCount
                 }
             }
             if (remaining == 0)
