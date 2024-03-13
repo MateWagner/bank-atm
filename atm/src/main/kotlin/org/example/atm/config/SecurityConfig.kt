@@ -22,8 +22,11 @@ class SecurityConfig(
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
        http {
            csrf{ disable()}
+
            authorizeHttpRequests {
-               authorize(anyRequest, authenticated)
+               authorize("/api/v1/admin/**", hasAuthority(Roles.ADMIN.name))
+               authorize("/api/**",authenticated )
+               authorize(anyRequest, permitAll)
            }
            formLogin { }
            httpBasic { }

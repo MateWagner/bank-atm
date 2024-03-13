@@ -3,8 +3,6 @@ package org.example.atm.service
 import org.example.atm.api.BankApi
 import org.example.atm.config.Roles
 import org.example.atm.config.UserDetailsImp
-import org.example.atm.controller.dto.DepositDTO
-import org.example.atm.controller.dto.RefillDTO
 import org.example.atm.entity.Customer
 import org.example.atm.repository.CustomerRepository
 import org.springframework.security.core.GrantedAuthority

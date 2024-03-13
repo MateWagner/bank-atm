@@ -1,7 +1,6 @@
 package org.example.atm.service
 
 import org.example.atm.controller.dto.BanknoteMapDTO
-import org.example.atm.controller.dto.RefillDTO
 import org.example.atm.controller.dto.WithdrawDTO
 import org.example.atm.data.CurrencyTypes
 import org.example.atm.entity.BanknoteTray
@@ -19,8 +18,15 @@ class AtmService(
     val customerService: CustomerService,
 ) {
 
-    fun refill(refillDTO: RefillDTO) {
-        TODO()
+    fun refill(banknoteMapDTO: BanknoteMapDTO): BanknoteMapDTO {
+        val banknoteTrays: List<BanknoteTray> = banknoteTrayRepo.findAll()
+        banknoteMapDTO.banknotes.entries.forEach(){ (kay,value) -> banknoteTrays.find { it.value == kay }?.amount =
+            banknoteTrays.find { it.value == kay }?.amount?.plus(
+                value
+            )!!
+        }
+        val newState: Map<Int, Int> = banknoteTrays.associate { Pair(it.value, it.amount) }
+        return BanknoteMapDTO(newState)
     }
 
     fun deposit(banknoteMapDTO: BanknoteMapDTO, userName: String): Int {
