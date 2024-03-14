@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Main Controller", description = "It serves to collect all the endpoints in one place")
 @RestController
+@SecurityRequirement(name = "basicAuth")
 @RequestMapping("/api/v1/")
 class LazzyController(
     val customerService: CustomerService,
@@ -51,7 +52,6 @@ class LazzyController(
         ),
         ApiResponse(responseCode = "401", description = "Unauthorized", content = [Content(schema = Schema())]),
     )
-    @SecurityRequirement(name = "user_auth")
     @GetMapping("user-balance")
     fun userBalance(@AuthenticationPrincipal userDetails: UserDetails): Int =
         customerService.userBalance(userDetails.username)
@@ -84,7 +84,7 @@ class LazzyController(
         ),
         ApiResponse(responseCode = "401", description = "Unauthorized", content = [Content(schema = Schema())]),
     )
-    @SecurityRequirement(name = "user_auth")
+
     @PostMapping("/withdraw")
     fun withdraw(
         @RequestBody withdrawDTO: WithdrawDTO,
@@ -105,7 +105,6 @@ class LazzyController(
     ) =
         atmService.deposit(banknoteMapDTO, userDetails.username)
 
-    @SecurityRequirement(name = "admin_role")
     @Operation(
         summary = "Admin can fill up the ATM",
         description = "Admin account can fill up the ATM. Login credential need to include to the application.properties"

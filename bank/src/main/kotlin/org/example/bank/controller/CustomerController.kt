@@ -21,7 +21,7 @@ class CustomerController(
     fun userBalance(@PathVariable userName: String): BalanceResponseDTO =
         customerService.userBalance(userName)
     @PostMapping("/modify-balance")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun modifyBalance(@RequestBody modifyBalanceDTO: ModifyBalanceDTO) =
         customerService.modifyBalance(modifyBalanceDTO)
 }
