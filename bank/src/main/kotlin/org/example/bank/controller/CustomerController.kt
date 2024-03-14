@@ -1,5 +1,9 @@
 package org.example.bank.controller
 
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.Parameters
+import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.models.media.StringSchema
 import org.example.bank.controller.dto.BalanceResponseDTO
 import org.example.bank.controller.dto.ModifyBalanceDTO
 import org.example.bank.service.CustomerService

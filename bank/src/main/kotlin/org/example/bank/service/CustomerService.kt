@@ -14,14 +14,12 @@ class CustomerService(
 ) {
     fun userBalance(userName:String): BalanceResponseDTO {
         val customer = getUserByUsername(userName)
-        println(customer)
         return BalanceResponseDTO(userName, customer.balance)
     }
 
     fun modifyBalance(modifyBalanceDTO: ModifyBalanceDTO) {
         val customer = getUserByUsername(modifyBalanceDTO.userName)
         customer.balance += modifyBalanceDTO.amount
-        println(customer)
         customerRepository.save(customer)
     }
 

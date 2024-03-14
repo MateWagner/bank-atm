@@ -14,7 +14,4 @@ import org.springframework.context.annotation.Configuration
   scheme = "basic"
 )
 class OpenAPIConfig {
-//  @Bean
-//  fun openAPIConfig():OpenAPI=
-
 }
