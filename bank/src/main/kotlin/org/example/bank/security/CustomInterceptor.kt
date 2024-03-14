@@ -10,7 +10,7 @@ import org.springframework.web.servlet.HandlerInterceptor
 @Service
 class CustomInterceptor: HandlerInterceptor {
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        if (request.getHeader("X-ATM") != "value") // TODO refine the logic if need
+        if (request.requestURI.contains("/api/") && request.getHeader("X-ATM") != "value")
             throw HttpClientErrorException(HttpStatus.FORBIDDEN, "Missing auth Information")
         return super.preHandle(request, response, handler)
     }
